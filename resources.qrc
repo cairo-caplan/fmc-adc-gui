@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/imgs">
+        <file>imgs/CERN-logo.jpg</file>
+        <file>imgs/cbpf.jpeg</file>
+        <file>imgs/Open-source-hardware-logo.svg.png</file>
+        <file>imgs/ohr_logo_240x320_image.png</file>
+        <file>imgs/TriggerEdge.png</file>
+        <file>imgs/RisingEdge.png</file>
+        <file>imgs/FallingEdge.png</file>
+        <file>imgs/BothEdges.png</file>
+        <file>imgs/120px-True_icon.svg.png</file>
+        <file>imgs/120px-False_icon.svg.png</file>
+    </qresource>
+    <qresource prefix="/"/>
+</RCC>
