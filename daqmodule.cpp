@@ -1,4 +1,18 @@
 #include "daqmodule.h"
+#include <iostream>
+
+static acq_conf_t init_acq_conf(acq_conf_t acq_conf){
+    acq_conf.range = R_10V;
+    acq_conf.presamples = 100;
+    acq_conf.posamples = 100;
+    acq_conf.trigger_threshold = 10;
+    acq_conf.undersampling = 1;
+    acq_conf.trigger = INTERNAL;
+    acq_conf.trigger_channel = CH1;
+    acq_conf.trigger_edge = RISING;
+    return acq_conf;
+}
+
 
 DAQmodule::DAQmodule(){
     setup();
@@ -8,24 +22,35 @@ DAQmodule::DAQmodule(){
 
 void DAQmodule::setup(){
     m_run_acq = false;
+    this->DaqState = IDLE;
+    emit this->updateState(DaqState);
+    this->acq_conf = init_acq_conf(this->acq_conf);
+
 }
 
 void DAQmodule::run(){
     qDebug()<<"From worker thread: "<<currentThreadId();
 }
 
+
+// Start acquisition process loop
 void DAQmodule::start_acq()
     {
         qDebug()<<"Thread::start called from main thread: "<<currentThreadId();
         QMutexLocker locker(&m_mutex);
         m_run_acq=true;
 
+        //Create an asynchronous process to execute que command line acq_program
         proc = new QProcess();
         connect(proc,SIGNAL(finished(int)),this,SLOT(setFinished(int)));
-        lol = new QTimer(0);
-        connect(lol,SIGNAL(timeout()),this,SLOT(doAcq()));
-        lol->setInterval(100);
-        lol->start();
+        acqTimer = new QTimer(0);
+        //After the timeout of the process, run doAcq function
+        connect(acqTimer,SIGNAL(timeout()),this,SLOT(doAcq()));
+        //Set run intervals/timeout to 100 ms
+        //Empirically, 200ms = 13% CPU usage and 100ms = 65% CPU usage
+        acqTimer->setInterval(100);
+        DaqState = RUNNING;
+        acqTimer->start();
     }
 
 
@@ -34,7 +59,21 @@ void DAQmodule::stop_acq()
         qDebug()<<"Thread::stop called from main thread: "<<currentThreadId();
         QMutexLocker locker(&m_mutex);
         m_run_acq=false;
-        proc->kill();
+        acqTimer->stop();
+
+        //volatile int pid = proc->pid();
+        //std::cout << "PID = " << pid << std::endl;
+        //If process is still alive, try to finish it
+        while ((proc->state() != QProcess::NotRunning)){
+            //if it hasn't finsihed yet
+            QCoreApplication::processEvents();
+            //(proc->waitForFinished(100)==false
+            //proc->waitForFinished(100);
+            proc->terminate();
+        }
+
+        DaqState = IDLE;
+        emit this->updateState(DaqState);
     }
 
 void DAQmodule::update_acq_conf(acq_conf_t acq_conf){
@@ -70,25 +109,28 @@ void DAQmodule::update_acq_conf(acq_conf_t acq_conf){
     acq_program_arg.append(QString::number(acq_conf.range));
 
     acq_program_arg.append(" 0x200 ");
-    //acq_program_arg.append(" 1> /dev/shm/fmcadc.0x0200.dat 2> /dev/shm/fmcadc.err.txt");
-
-
-    //const char* final = acq_program_arg.toAscii().data();
-    //puts(final);
-
 
 
 }
 
-void DAQmodule::setFinished(int ExitCode){
-    this->finished = true;
-    emit this->acqAvailable();
+//Function that emits a signal acqAvailable once the execution
+// of the acq_program was completed
+void DAQmodule::setFinished(int dummy){
+    //If it was not terminated by the doAcq procedure
+    if (this->finished==false){
+        DaqState = RUNNING;
+        this->finished = true;
+        emit this->acqAvailable(true);
+        emit updateState(DaqState);
+    }
 }
 
 void DAQmodule::doAcq(){
     {
         QMutexLocker locker(&m_mutex);
+        //If the acquisition mode is active
         if (m_run_acq==true){
+            // If the process is not running, because it finished before for instance
             if ((proc->state() == QProcess::NotRunning) || this->finished==true){
                 finished=false;
                 //puts ("Not Running");
@@ -111,9 +153,11 @@ void DAQmodule::doAcq(){
 
                 proc->write(QStrFinal.toLocal8Bit().data());
                 //proc->write("kate");
+                //std::cout << QStrFinal.toLocal8Bit().data() << '\n' << endl;
 
                 proc->closeWriteChannel();
                 proc->waitForStarted();
+                //connect(procTimer,SIGNAL(timeout()),proc,SLOT(terminate()));
                 //printf("pid = %lld\n",proc->pid());
 
                 //proc->waitForFinished();
@@ -125,8 +169,37 @@ void DAQmodule::doAcq(){
                 //proc->waitForFinished();
 
             }
+            //else if it is still running
             else{
-                //puts ("Running");
+                DaqState = NON_TRIGGERED;
+                 emit this->updateState(DaqState);
+                QCoreApplication::processEvents();
+
+                this->finished = true;
+
+                //Update the canvas, but with no new samples
+                emit this->acqAvailable(false);
+
+                if ((proc->state() != QProcess::NotRunning)){
+                    //if it hasn't finsihed yet
+                    //proc->waitForFinished(100);
+                    proc->terminate();
+                    //lol->stop();
+
+                }
+
+//                if (proc->waitForFinished(100)==false){
+//                    QCoreApplication::processEvents();
+//                    volatile int pid = proc->pid();
+//                    std::cout << "PID = " << pid << std::endl;
+//                    proc->terminate();
+//                    pid = proc->pid();
+//                    std::cout << "PID = " << pid << std::endl;
+//                    DaqState = NON_TRIGGERED;
+//                }else{
+//                    DaqState = RUNNING;
+//                }
+
 
             }
         }
@@ -137,6 +210,10 @@ void DAQmodule::update_acq_path_settings(acq_path_settings_t acq_path_settings){
     QMutexLocker locker(&m_mutex);
     this->acq_path_settings = acq_path_settings;
 
+}
+
+DaqState_t DAQmodule::getState(){
+    return this->DaqState;
 }
 
 

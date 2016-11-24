@@ -97,6 +97,9 @@
      <pointsize>9</pointsize>
     </font>
    </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
    <item>
     <property name="text">
      <string>0200</string>
@@ -157,7 +160,7 @@
     </font>
    </property>
    <property name="text">
-    <string>/home/lablafex6/adc/libtools/acq-program</string>
+    <string>/opt/adc/libtools/acq-program</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">

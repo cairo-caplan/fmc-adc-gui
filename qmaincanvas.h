@@ -1,6 +1,7 @@
 #ifndef QMAINCANVAS_H
 #define QMAINCANVAS_H
 
+
 #include <QTimer>
 #include <QPaintEvent>
 #include <QResizeEvent>
@@ -21,6 +22,9 @@
 #include <TTimer.h>
 
 #include <TLine.h>
+
+#include <TQObject.h>
+#include "TROOT.h"
 
 #include <QWidget>
 #include "qrootcanvas.h"

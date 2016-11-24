@@ -17,6 +17,7 @@ public:
     explicit FrmSettings(QWidget *parent = 0);
     ~FrmSettings();
     acq_path_settings_t acq_path_settings;
+    char* getBoardId();
 
 signals:
     void newAcqPathSettings(acq_path_settings_t acq_path_settings);

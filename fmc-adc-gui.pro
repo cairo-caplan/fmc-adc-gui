@@ -4,9 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui widgets
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+# greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = fmc-adc-gui
 TEMPLATE = app
@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     aboutwindow.cpp \
     frmsettings.cpp \
     daqmodule.cpp \
-    vxtrootcanvas.cpp
+    vxtrootcanvas.cpp \
+    histogram.cpp
 
 HEADERS  += mainwindow.h \
     qmaincanvas.h \
@@ -39,7 +40,9 @@ HEADERS  += mainwindow.h \
     aboutwindow.h \
     frmsettings.h \
     daqmodule.h \
-    vxtrootcanvas.h
+    vxtrootcanvas.h \
+    acq_types.h \
+    histogram.h
 
 FORMS    += mainwindow.ui \
     aboutwindow.ui \

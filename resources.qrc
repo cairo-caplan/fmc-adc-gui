@@ -10,6 +10,7 @@
         <file>imgs/BothEdges.png</file>
         <file>imgs/120px-True_icon.svg.png</file>
         <file>imgs/120px-False_icon.svg.png</file>
+        <file>imgs/circuit-board.svg</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

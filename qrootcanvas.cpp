@@ -15,7 +15,7 @@ QRootCanvas::QRootCanvas(QWidget *parent) : QWidget(parent, 0), fCanvas(0)
    setMouseTracking(kTRUE);
 
 
-   // register the QWidget in TVirtualX, giving its native window id
+   // registTCanvaser the QWidget in TVirtualX, giving its native window id
    //int wid = gVirtualX->AddWindow((ULong_t)winId(), 600, 400);
    int wid = gVirtualX->AddWindow((ULong_t)this->winId(), 600, 400);
 
@@ -27,18 +27,24 @@ QRootCanvas::QRootCanvas(QWidget *parent) : QWidget(parent, 0), fCanvas(0)
 void QRootCanvas::mouseMoveEvent(QMouseEvent *e)
 {
    // Handle mouse move events.
+    try {
+        if (fCanvas) {
+           if (e->buttons() & Qt::LeftButton) {
+              fCanvas->HandleInput(kButton1Motion, e->x(), e->y());
+           } else if (e->buttons() & Qt::MidButton) {
+              fCanvas->HandleInput(kButton2Motion, e->x(), e->y());
+           } else if (e->buttons() & Qt::RightButton) {
+              fCanvas->HandleInput(kButton3Motion, e->x(), e->y());
+           } else {
+              fCanvas->HandleInput(kMouseMotion, e->x(), e->y());
+           }
+        }
 
-   if (fCanvas) {
-      if (e->buttons() & Qt::LeftButton) {
-         fCanvas->HandleInput(kButton1Motion, e->x(), e->y());
-      } else if (e->buttons() & Qt::MidButton) {
-         fCanvas->HandleInput(kButton2Motion, e->x(), e->y());
-      } else if (e->buttons() & Qt::RightButton) {
-         fCanvas->HandleInput(kButton3Motion, e->x(), e->y());
-      } else {
-         fCanvas->HandleInput(kMouseMotion, e->x(), e->y());
-      }
-   }
+    } catch (int e)
+    {
+      std::cout << "An exception occurred. Exception Nr. " << e << '\n';
+    }
+
 }
 
 //______________________________________________________________________________
@@ -89,6 +95,7 @@ void QRootCanvas::mouseReleaseEvent( QMouseEvent *e )
             break;
       }
    }
+   emit sMouseReleaseEvent(e);
 }
 
 //______________________________________________________________________________

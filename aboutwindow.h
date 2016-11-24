@@ -10,11 +10,9 @@ class AboutWindow;
 class AboutWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit AboutWindow(QWidget *parent = 0);
     ~AboutWindow();
-
 private:
     Ui::AboutWindow *ui;
 };

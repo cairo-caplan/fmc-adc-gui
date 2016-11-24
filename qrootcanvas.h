@@ -40,6 +40,12 @@ protected:
    virtual void    resizeEvent( QResizeEvent *e );
 
 signals:
+   void    sMouseMoveEvent( QMouseEvent *e );
+   void    sMousePressEvent( QMouseEvent *e );
+   void    sMouseReleaseEvent( QMouseEvent *e );
+   void    sPaintEvent( QPaintEvent *e );
+   void    sResizeEvent( QResizeEvent *e );
+
 
 public slots:
 };

@@ -1,12 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "qmaincanvas.h"
-#include "vxtrootcanvas.h"
 
-#include "aboutwindow.h"
-#include "frmsettings.h"
-#include "daqmodule.h"
 
 #include <QMainWindow>
 
@@ -16,19 +11,16 @@
 #include <QtGui>
 #endif
 
+#include "qmaincanvas.h"
+#include "vxtrootcanvas.h"
+#include "histogram.h"
+
+#include "aboutwindow.h"
+#include "frmsettings.h"
+#include "daqmodule.h"
 
 
 
-typedef struct{
-    range_t range;
-    double threshold_max;
-    double threshold_min;
-    double pre_samples_time;
-    double pos_samples_time;
-    unsigned long undersample;
-    unsigned long sampling;
-
-} acq_visual_conf_t;
 
 namespace Ui {
 class MainWindow;
@@ -41,35 +33,44 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-     QMainCanvas *m;
+     Histogram *m;
      VxtRootCanvas *vxt;
      DAQmodule* daqModule;
 
 private slots:
-     void on_btnStartAcquisition_pressed();
-
-     void on_btnStartAcquisition_released();
 
      void on_btnStartAcquisition_toggled(bool checked);
 
      void openAboutWindow();
      void openFrmSettings();
 
-     void updateChannels(int state);
+     void updateChannels();
+     void updateTerminations();
      void updateCbScale(int value);
      void updateSliderScale(int id);
      void updateDialTrigger(double value);
      void updateSbTriggerValue(int value);
+     void updateTriggerChannel();
 
+     void TimeUnitsChanged();
      void updateTimeUnits(int index);
      void updateSbSampling(int value);
-     void updateDialSampling(int value);
+     void updateDialSampling();
 
      void updateAcqConf();
      void checkTimingAndSampling();
 
      void startAcquisition(bool state);
+     void GetUpdatedDaqState(DaqState_t DaqState);
 
+     void on_cbVCursor1_toggled(bool checked);
+
+     void on_cbVCursor2_toggled(bool checked);
+
+
+     void on_btnHistSave_released();
+
+     void on_btnVxtSave_released();
 
 private:
     Ui::MainWindow *ui;
@@ -81,7 +82,12 @@ private:
     acq_visual_conf_t acq_visual_conf;
     acq_path_settings_t acq_path_settings;
 
-    double acq_time_window_max = 0.0000001;
+    double acq_time_window_max;
+
+signals:
+    void saveHist(char* path);
+    void saveGraph(char* path);
+
 };
 
 #endif // MAINWINDOW_H

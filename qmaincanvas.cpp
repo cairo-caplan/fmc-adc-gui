@@ -14,6 +14,8 @@ QMainCanvas::QMainCanvas(QWidget *parent) : QWidget(parent)
    fRootTimer = new QTimer( this );
    QObject::connect( fRootTimer, SIGNAL(timeout()), this, SLOT(handle_root_events()) );
    fRootTimer->start( 20 );
+
+
 }
 
 //______________________________________________________________________________
@@ -37,7 +39,7 @@ void QMainCanvas::clicked1()
    h1f = new TH1F("h1f","Test random numbers", 200, 0, 10);
    h1f->SetFillColor(kViolet + 2);
    h1f->SetFillStyle(3001);
-   h1f->FillRandom("sqroot", 10000);
+   ////h1f->FillRandom("sqroot", 10000);
    h1f->Draw();
    canvas->getCanvas()->Modified();
    canvas->getCanvas()->Update();
